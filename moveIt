@@ -1,0 +1,3 @@
+#!/bin/sh
+make
+cp modules/SugarNero.so /usr/local/Cellar/php54/5.4.38/lib/php/extensions/no-debug-non-zts-20100525

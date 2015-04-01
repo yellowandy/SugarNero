@@ -1,0 +1,8 @@
+SugarNero.lo: /Users/asandberg/Downloads/php-5.4.38/ext/SugarNero/SugarNero.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/asandberg/Downloads/php-5.4.38/ext/SugarNero $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/asandberg/Downloads/php-5.4.38/ext/SugarNero/SugarNero.c -o SugarNero.lo 
+$(phplibdir)/SugarNero.la: ./SugarNero.la
+	$(LIBTOOL) --mode=install cp ./SugarNero.la $(phplibdir)
+
+./SugarNero.la: $(shared_objects_SugarNero) $(SUGARNERO_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_SugarNero) $(SUGARNERO_SHARED_LIBADD)
+

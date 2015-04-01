@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("SugarNero", "for SugarNero support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("SugarNero", "enable SugarNero support", "no");
+
+if (PHP_SUGARNERO != "no") {
+	EXTENSION("SugarNero", "SugarNero.c");
+}
+
