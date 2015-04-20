@@ -27,9 +27,19 @@
 #include "ext/standard/info.h"
 #include "php_SugarNero.h"
 
-/* If you declare any globals in php_SugarNero.h uncomment this:
+
+
+/* pointer to the original Zend engine compile_file function */
+typedef zend_op_array* (zend_compile_t)(zend_file_handle*, int TSRMLS_DC);
+static zend_compile_t *old_compile_file;
+zend_op_array* ext_zend_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
+//static apc_serializer_t apc_serializers[APC_MAX_SERIALIZERS] = {{0,}};
+
+
+
+
 ZEND_DECLARE_MODULE_GLOBALS(SugarNero)
-*/
+
 
 /* True global resources - no need for thread safety here */
 static int le_SugarNero;
@@ -70,32 +80,34 @@ ZEND_GET_MODULE(SugarNero)
 
 /* {{{ PHP_INI
  */
-/* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("SugarNero.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_SugarNero_globals, SugarNero_globals)
-    STD_PHP_INI_ENTRY("SugarNero.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_SugarNero_globals, SugarNero_globals)
+    STD_PHP_INI_BOOLEAN("SugarNero.enabled",      "0",    PHP_INI_SYSTEM, OnUpdateBool,              nero_enabled,         zend_SugarNero_globals, SugarNero_globals)
+    STD_PHP_INI_ENTRY("SugarNero.flav", "ent", PHP_INI_ALL, OnUpdateString, nero_flav, zend_SugarNero_globals, SugarNero_globals)
 PHP_INI_END()
-*/
 /* }}} */
 
 /* {{{ php_SugarNero_init_globals
  */
-/* Uncomment this function if you have INI entries
 static void php_SugarNero_init_globals(zend_SugarNero_globals *SugarNero_globals)
 {
-	SugarNero_globals->global_value = 0;
-	SugarNero_globals->global_string = NULL;
+	SugarNero_globals->nero_enabled = 0;
+	SugarNero_globals->nero_flav = NULL;
 }
-*/
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(SugarNero)
 {
-	/* If you have INI entries, uncomment these lines 
 	REGISTER_INI_ENTRIES();
-	*/
+
+    //If we are enabled we'll re-write all source code that is sent to us.
+	if(SUGARNERO_G(nero_enabled)) {
+
+	    old_compile_file = zend_compile_file;
+        zend_compile_file = ext_zend_compile_file;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -104,9 +116,7 @@ PHP_MINIT_FUNCTION(SugarNero)
  */
 PHP_MSHUTDOWN_FUNCTION(SugarNero)
 {
-	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
-	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -133,15 +143,38 @@ PHP_RSHUTDOWN_FUNCTION(SugarNero)
  */
 PHP_MINFO_FUNCTION(SugarNero)
 {
+    printf("PRINTING TABLE");
+    fputs("Hello World full of errors!", stderr);
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SugarNero support", "enabled");
+	php_info_print_table_header(2, "SugarNero support", SUGARNERO_G(nero_enabled) ? "enabled" : "disabled");
+	php_info_print_table_row(2, "Sugar Flavor", SUGARNERO_G(nero_flav));
 	php_info_print_table_end();
 
-	/* Remove comments if you have entries in php.ini
 	DISPLAY_INI_ENTRIES();
-	*/
+
 }
 /* }}} */
+
+
+zend_op_array* ext_zend_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+{
+
+    char *buf;
+    size_t size;
+    if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
+        return NULL;
+    }
+
+
+    char *res = "<?php echo 'hello';";
+    size_t res_size = 19;
+
+    file_handle->handle.stream.mmap.buf = res;
+    file_handle->handle.stream.mmap.len = res_size;
+
+
+    return old_compile_file(file_handle, type TSRMLS_CC);
+}
 
 
 /* Remove the following function when you have successfully modified config.m4

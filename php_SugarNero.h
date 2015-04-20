@@ -46,15 +46,12 @@ PHP_MINFO_FUNCTION(SugarNero);
 
 PHP_FUNCTION(confirm_SugarNero_compiled);	/* For testing, remove later. */
 
-/* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(SugarNero)
-	long  global_value;
-	char *global_string;
+	char *nero_flav;
+	zend_bool nero_enabled;
 ZEND_END_MODULE_GLOBALS(SugarNero)
-*/
+
 
 /* In every utility function you add that needs to use variables 
    in php_SugarNero_globals, call TSRMLS_FETCH(); after declaring other 

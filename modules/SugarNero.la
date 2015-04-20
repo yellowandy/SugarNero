@@ -32,4 +32,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/Users/asandberg/Downloads/php-5.4.38/ext/SugarNero/modules'
+libdir='/Users/asandberg/Dev/SugarNero/modules'
